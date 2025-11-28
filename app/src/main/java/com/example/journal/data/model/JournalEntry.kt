@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 data class JournalEntry(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
+    val journalId: Long, // Foreign key to Journal
     val title: String,
     val content: String,
     val date: Long, // Timestamp in milliseconds
