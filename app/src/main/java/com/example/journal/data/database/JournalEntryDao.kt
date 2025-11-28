@@ -16,6 +16,9 @@ interface JournalEntryDao {
     @Query("SELECT * FROM journal_entries WHERE date >= :startOfDay AND date < :endOfDay ORDER BY createdAt DESC")
     fun getEntriesByDate(startOfDay: Long, endOfDay: Long): Flow<List<JournalEntry>>
     
+    @Query("SELECT * FROM journal_entries WHERE journalId = :journalId ORDER BY date DESC, createdAt DESC")
+    fun getEntriesByJournalId(journalId: Long): Flow<List<JournalEntry>>
+    
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertEntry(entry: JournalEntry): Long
     

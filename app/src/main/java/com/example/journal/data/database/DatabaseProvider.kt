@@ -13,7 +13,9 @@ object DatabaseProvider {
                 context.applicationContext,
                 JournalDatabase::class.java,
                 JournalDatabase.DATABASE_NAME
-            ).build()
+            )
+            .fallbackToDestructiveMigration() // For now, allow schema changes
+            .build()
             INSTANCE = instance
             instance
         }
