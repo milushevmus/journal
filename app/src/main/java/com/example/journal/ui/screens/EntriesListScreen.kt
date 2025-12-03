@@ -1,0 +1,205 @@
+package com.example.journal.ui.screens
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.journal.data.model.Journal
+import com.example.journal.ui.components.EmptyState
+import com.example.journal.ui.components.JournalEditBottomSheet
+import com.example.journal.ui.viewmodels.JournalViewModel
+import com.example.journal.ui.viewmodel.getJournalViewModelFactory
+import kotlinx.coroutines.launch
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EntriesListScreen(
+    onNavigateBack: () -> Unit,
+    onJournalSelected: (Long) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val viewModel: JournalViewModel = viewModel(
+        factory = getJournalViewModelFactory(context)
+    )
+    val journals by viewModel.allJournals.collectAsState(initial = emptyList())
+    val scope = rememberCoroutineScope()
+    
+    var showBottomSheet by remember { mutableStateOf(false) }
+    var journalToEdit by remember { mutableStateOf<Journal?>(null) }
+    var showDeleteDialog by remember { mutableStateOf<Journal?>(null) }
+    var showMenuForJournal by remember { mutableStateOf<Journal?>(null) }
+    
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        topBar = {
+            TopAppBar(
+                title = { Text("Journals") },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
+                }
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    journalToEdit = null
+                    showBottomSheet = true
+                },
+                containerColor = MaterialTheme.colorScheme.primary
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add Journal",
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+        }
+    ) { paddingValues ->
+        if (journals.isEmpty()) {
+            EmptyState(
+                message = "No Journals",
+                description = "Create your first journal to get started"
+            )
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentPadding = PaddingValues(8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                items(journals) { journal ->
+                    var showMenu by remember { mutableStateOf(false) }
+                    
+                    ListItem(
+                        headlineContent = { Text(journal.name) },
+                        trailingContent = {
+                            Row {
+                                Box {
+                                    IconButton(
+                                        onClick = { showMenu = true }
+                                    ) {
+                                        Icon(
+                                            Icons.Default.MoreVert,
+                                            contentDescription = "More options"
+                                        )
+                                    }
+                                    DropdownMenu(
+                                        expanded = showMenu,
+                                        onDismissRequest = { showMenu = false }
+                                    ) {
+                                        DropdownMenuItem(
+                                            text = { Text("Edit") },
+                                            onClick = {
+                                                showMenu = false
+                                                journalToEdit = journal
+                                                showBottomSheet = true
+                                            }
+                                        )
+                                        DropdownMenuItem(
+                                            text = { 
+                                                Text(
+                                                    "Delete",
+                                                    color = MaterialTheme.colorScheme.error
+                                                ) 
+                                            },
+                                            onClick = {
+                                                showMenu = false
+                                                showDeleteDialog = journal
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onJournalSelected(journal.id) }
+                    )
+                    HorizontalDivider()
+                }
+            }
+        }
+    }
+    
+    // Delete confirmation dialog
+    showDeleteDialog?.let { journal ->
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = null },
+            title = { Text("Delete Journal?") },
+            text = { 
+                Text("Are you sure you want to delete \"${journal.name}\"? This will permanently delete the journal and all notes inside it. This action cannot be undone.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        scope.launch {
+                            viewModel.deleteJournalById(journal.id)
+                            showDeleteDialog = null
+                        }
+                    }
+                ) {
+                    Text(
+                        "Delete",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = null }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+    
+    // Journal edit bottom sheet
+    if (showBottomSheet) {
+        JournalEditBottomSheet(
+            journal = journalToEdit,
+            onDismiss = { showBottomSheet = false },
+            onSave = { name, color, icon ->
+                scope.launch {
+                    if (journalToEdit != null) {
+                        // Update existing journal
+                        val updated = journalToEdit!!.copy(
+                            name = name,
+                            color = color,
+                            icon = icon
+                        )
+                        viewModel.updateJournal(updated)
+                    } else {
+                        // Create new journal
+                        val newJournal = Journal(
+                            name = name,
+                            color = color,
+                            icon = icon
+                        )
+                        val journalId = viewModel.insertJournal(newJournal)
+                        onJournalSelected(journalId)
+                    }
+                }
+            }
+        )
+    }
+}
