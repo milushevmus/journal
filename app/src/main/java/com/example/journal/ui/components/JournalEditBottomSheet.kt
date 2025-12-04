@@ -44,8 +44,7 @@ fun JournalEditBottomSheet(
         "#1976D2", // Darker Blue
         "#03A9F4", // Light Gray-Blue
         "#9C27B0", // Lavender/Light Purple
-        "#FFFFFF", // White
-        "#6650a4" // Default purple
+        "#000000", // Black
     )
     
     val icons = listOf(
@@ -176,30 +175,23 @@ fun JournalEditBottomSheet(
                 columns = GridCells.Fixed(7),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.height(80.dp)
+                modifier = Modifier.height(96.dp)
             ) {
                 items(colors) { color ->
                     val isSelected = color == selectedColor
-                    Box(
+                    Surface(
                         modifier = Modifier
                             .size(40.dp)
-                            .clip(CircleShape)
-                            .background(Color(android.graphics.Color.parseColor(color)))
                             .clickable { selectedColor = color },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (isSelected) {
-                            Surface(
-                                modifier = Modifier.size(40.dp),
-                                shape = CircleShape,
-                                color = Color.Transparent,
-                                border = BorderStroke(
-                                    3.dp,
-                                    MaterialTheme.colorScheme.onSurface
-                                )
-                            ) {}
-                        }
-                    }
+                        shape = CircleShape,
+                        color = Color(android.graphics.Color.parseColor(color)),
+                        border = if (isSelected) {
+                            BorderStroke(
+                                3.dp,
+                                MaterialTheme.colorScheme.onSurface
+                            )
+                        } else null
+                    ) {}
                 }
             }
             
@@ -212,7 +204,7 @@ fun JournalEditBottomSheet(
                 columns = GridCells.Fixed(6),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.height(300.dp)
+                modifier = Modifier.height(280.dp)
             ) {
                 items(icons) { (iconId, iconVector) ->
                     val isSelected = iconId == selectedIcon

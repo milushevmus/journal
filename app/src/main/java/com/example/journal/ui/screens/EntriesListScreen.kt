@@ -4,11 +4,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -17,7 +15,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -91,7 +92,29 @@ fun EntriesListScreen(
                 items(journals) { journal ->
                     var showMenu by remember { mutableStateOf(false) }
                     
+                    val iconVector = getIconFromString(journal.icon)
+                    val journalColor = Color(android.graphics.Color.parseColor(journal.color))
+                    
                     ListItem(
+                        leadingContent = {
+                            Surface(
+                                modifier = Modifier.size(40.dp),
+                                shape = CircleShape,
+                                color = journalColor
+                            ) {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        iconVector,
+                                        contentDescription = null,
+                                        tint = Color.White,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+                            }
+                        },
                         headlineContent = { Text(journal.name) },
                         trailingContent = {
                             Row {
@@ -201,5 +224,31 @@ fun EntriesListScreen(
                 }
             }
         )
+    }
+}
+
+private fun getIconFromString(iconString: String): ImageVector {
+    return when (iconString) {
+        "smile" -> Icons.Default.SentimentSatisfied
+        "description" -> Icons.Default.Description
+        "home" -> Icons.Default.Home
+        "bed" -> Icons.Default.Bedtime
+        "restaurant" -> Icons.Default.Restaurant
+        "book" -> Icons.Default.Book
+        "phone" -> Icons.Default.Phone
+        "key" -> Icons.Default.Key
+        "lightbulb" -> Icons.Default.Lightbulb
+        "camera" -> Icons.Default.CameraAlt
+        "favorite" -> Icons.Default.Favorite
+        "star" -> Icons.Default.Star
+        "work" -> Icons.Default.Work
+        "school" -> Icons.Default.School
+        "sports" -> Icons.Default.SportsSoccer
+        "music" -> Icons.Default.MusicNote
+        "travel" -> Icons.Default.Flight
+        "shopping" -> Icons.Default.ShoppingCart
+        "food" -> Icons.Default.RestaurantMenu
+        "health" -> Icons.Default.LocalHospital
+        else -> Icons.Default.Description
     }
 }
