@@ -1,14 +1,17 @@
 package com.example.journal.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.journal.data.preferences.JournalPreferences
 import com.example.journal.ui.screens.DateEntriesListScreen
 import com.example.journal.ui.screens.DateSelectionScreen
 import com.example.journal.ui.screens.EntriesListScreen
@@ -21,8 +24,17 @@ fun JournalNavigation(
     startDestination: String = JournalRoutes.HOME,
     modifier: androidx.compose.ui.Modifier = androidx.compose.ui.Modifier
 ) {
-    var selectedJournalId by remember { mutableStateOf<Long?>(null) }
+    val context = LocalContext.current
+    val preferences = remember { JournalPreferences(context) }
+    
+    var selectedJournalId by remember {
+        mutableStateOf<Long?>(preferences.getSelectedJournalId())
+    }
     var selectedDate by remember { mutableStateOf(System.currentTimeMillis()) }
+    
+    LaunchedEffect(selectedJournalId) {
+        selectedJournalId?.let { preferences.setSelectedJournalId(it) }
+    }
     
     NavHost(
         navController = navController,
@@ -40,6 +52,10 @@ fun JournalNavigation(
                 },
                 onNavigateToEntryEdit = { entryId ->
                     navController.navigate(JournalRoutes.ENTRY_EDIT)
+                },
+                onJournalSelected = { journalId ->
+                    selectedJournalId = journalId
+                    preferences.setSelectedJournalId(journalId)
                 }
             )
         }
@@ -49,6 +65,7 @@ fun JournalNavigation(
                 onNavigateBack = { navController.popBackStack() },
                 onJournalSelected = { journalId ->
                     selectedJournalId = journalId
+                    preferences.setSelectedJournalId(journalId)
                     navController.popBackStack()
                 }
             )
@@ -91,7 +108,6 @@ fun JournalNavigation(
             DateEntriesListScreen(
                 selectedDate = date,
                 onNavigateBack = { 
-                    // Always go back to DateSelectionScreen
                     navController.popBackStack(JournalRoutes.DATE_SELECTION, inclusive = false)
                 },
                 onNavigateToEntryDetail = { entryId ->
