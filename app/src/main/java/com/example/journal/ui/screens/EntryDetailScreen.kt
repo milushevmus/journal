@@ -1,5 +1,8 @@
 package com.example.journal.ui.screens
 
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -10,6 +13,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.journal.data.model.JournalEntry
@@ -36,21 +42,91 @@ fun EntryDetailScreen(
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
     
+    data class TextState(val title: String, val content: String)
+    val undoHistory = remember { mutableStateListOf<TextState>() }
+    val redoHistory = remember { mutableStateListOf<TextState>() }
+    var currentHistoryIndex by remember { mutableIntStateOf(-1) }
+    
+    var isBold by remember { mutableStateOf(false) }
+    var isItalic by remember { mutableStateOf(false) }
+    var isUnderline by remember { mutableStateOf(false) }
+    
+    var showMoreMenu by remember { mutableStateOf(false) }
+    
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        // TODO: Handle image URI - save to entry
+        uri?.let {
+            // Store image URI in entry
+        }
+    }
+    
     val selectedEntry by viewModel.selectedEntry.collectAsState()
     
-    // Load entry if editing existing
     LaunchedEffect(entryId) {
         if (entryId != null && !isEditMode) {
             viewModel.getEntryById(entryId)
         }
     }
     
-    // Update local state when entry is loaded
     LaunchedEffect(selectedEntry) {
         if (selectedEntry != null && !isEditMode) {
             title = selectedEntry!!.title
             content = selectedEntry!!.content
+            undoHistory.clear()
+            redoHistory.clear()
+            undoHistory.add(TextState(title, content))
+            currentHistoryIndex = 0
         }
+    }
+    
+    fun saveToHistory() {
+        val newState = TextState(title, content)
+        if (undoHistory.isEmpty() || undoHistory.last() != newState) {
+            undoHistory.add(newState)
+            redoHistory.clear()
+            currentHistoryIndex = undoHistory.size - 1
+            if (undoHistory.size > 50) {
+                undoHistory.removeAt(0)
+                currentHistoryIndex--
+            }
+        }
+    }
+    
+    fun undo() {
+        if (currentHistoryIndex > 0) {
+            val currentState = TextState(title, content)
+            redoHistory.add(currentState)
+            currentHistoryIndex--
+            val previousState = undoHistory[currentHistoryIndex]
+            title = previousState.title
+            content = previousState.content
+        }
+    }
+    
+    fun redo() {
+        if (redoHistory.isNotEmpty()) {
+            val currentState = TextState(title, content)
+            undoHistory.add(currentState)
+            currentHistoryIndex++
+            val nextState = redoHistory.removeLast()
+            title = nextState.title
+            content = nextState.content
+        }
+    }
+    
+    fun shareEntry() {
+        val entryTitle = if (isEditMode) title else (selectedEntry?.title ?: title)
+        val entryContent = if (isEditMode) content else (selectedEntry?.content ?: content)
+        val shareText = "$entryTitle\n\n$entryContent"
+        val sendIntent: Intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, shareText)
+            type = "text/plain"
+        }
+        val shareIntent = Intent.createChooser(sendIntent, null)
+        context.startActivity(shareIntent)
     }
     
     Scaffold(
@@ -85,23 +161,87 @@ fun EntryDetailScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        IconButton(onClick = { /* TODO: Share */ }) {
+                        IconButton(
+                            onClick = { 
+                                shareEntry()
+                            }
+                        ) {
                             Icon(Icons.Default.Share, contentDescription = "Share")
                         }
-                        IconButton(onClick = { /* TODO: Undo */ }) {
+                        IconButton(
+                            onClick = { undo() },
+                            enabled = currentHistoryIndex > 0
+                        ) {
                             Icon(Icons.Default.Undo, contentDescription = "Undo")
                         }
-                        IconButton(onClick = { /* TODO: Redo */ }) {
+                        IconButton(
+                            onClick = { redo() },
+                            enabled = redoHistory.isNotEmpty()
+                        ) {
                             Icon(Icons.Default.Redo, contentDescription = "Redo")
                         }
-                        IconButton(onClick = { /* TODO: Text formatting */ }) {
-                            Icon(Icons.Default.FormatBold, contentDescription = "Format")
+                        Box {
+                            IconButton(
+                                onClick = { 
+                                    isBold = !isBold
+                                }
+                            ) {
+                                Icon(
+                                    Icons.Default.FormatBold, 
+                                    contentDescription = "Format",
+                                    tint = if (isBold) MaterialTheme.colorScheme.primary 
+                                           else MaterialTheme.colorScheme.onSurface
+                                )
+                            }
                         }
-                        IconButton(onClick = { /* TODO: Image */ }) {
+                        IconButton(
+                            onClick = { 
+                                imagePickerLauncher.launch("image/*")
+                            }
+                        ) {
                             Icon(Icons.Default.Image, contentDescription = "Image")
                         }
-                        IconButton(onClick = { /* TODO: More options */ }) {
-                            Icon(Icons.Default.MoreVert, contentDescription = "More")
+                        Box {
+                            IconButton(
+                                onClick = { showMoreMenu = true }
+                            ) {
+                                Icon(Icons.Default.MoreVert, contentDescription = "More")
+                            }
+                            DropdownMenu(
+                                expanded = showMoreMenu,
+                                onDismissRequest = { showMoreMenu = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Italic") },
+                                    onClick = {
+                                        isItalic = !isItalic
+                                        showMoreMenu = false
+                                    },
+                                    leadingIcon = {
+                                        Icon(
+                                            Icons.Default.FormatItalic,
+                                            contentDescription = null,
+                                            tint = if (isItalic) MaterialTheme.colorScheme.primary 
+                                                   else MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Underline") },
+                                    onClick = {
+                                        isUnderline = !isUnderline
+                                        showMoreMenu = false
+                                    },
+                                    leadingIcon = {
+                                        Icon(
+                                            Icons.Default.FormatUnderlined,
+                                            contentDescription = null,
+                                            tint = if (isUnderline) MaterialTheme.colorScheme.primary 
+                                                   else MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+                                )
+                            }
                         }
                         IconButton(
                             onClick = {
@@ -145,20 +285,30 @@ fun EntryDetailScreen(
             if (isEditMode) {
                 OutlinedTextField(
                     value = title,
-                    onValueChange = { title = it },
+                    onValueChange = { 
+                        title = it
+                        saveToHistory()
+                    },
                     label = { Text("Title") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
                 OutlinedTextField(
                     value = content,
-                    onValueChange = { content = it },
+                    onValueChange = { 
+                        content = it
+                        saveToHistory()
+                    },
                     label = { Text("Content") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(min = 200.dp),
                     maxLines = Int.MAX_VALUE,
-                    textStyle = TextStyle.Default
+                    textStyle = TextStyle(
+                        fontWeight = if (isBold) FontWeight.Bold else FontWeight.Normal,
+                        textDecoration = if (isUnderline) TextDecoration.Underline else null,
+                        fontStyle = if (isItalic) FontStyle.Italic else FontStyle.Normal
+                    )
                 )
             } else {
                 // View mode
