@@ -17,6 +17,7 @@ import com.example.journal.ui.screens.DateSelectionScreen
 import com.example.journal.ui.screens.EntriesListScreen
 import com.example.journal.ui.screens.EntryDetailScreen
 import com.example.journal.ui.screens.JournalHomeScreen
+import com.example.journal.ui.screens.MoodSelectionScreen
 
 @Composable
 fun JournalNavigation(
@@ -89,6 +90,12 @@ fun JournalNavigation(
                 journalId = selectedJournalId,
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToEdit = { }
+            )
+        }
+
+        composable(JournalRoutes.MOOD) {
+            MoodSelectionScreen(
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 
