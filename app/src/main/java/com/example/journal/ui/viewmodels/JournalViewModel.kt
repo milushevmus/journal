@@ -95,7 +95,9 @@ class JournalViewModel(private val repository: JournalRepository) : ViewModel() 
     }
     
     fun setSelectedJournal(journalId: Long?) {
-        _selectedJournalId.value = journalId
+        viewModelScope.launch {
+            _selectedJournalId.value = journalId
+        }
     }
     
     suspend fun insertJournal(journal: Journal): Long {

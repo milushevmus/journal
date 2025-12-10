@@ -15,13 +15,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import android.content.Intent
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.journal.data.model.JournalEntry
+import com.example.journal.data.preferences.JournalPreferences
 import com.example.journal.ui.components.EmptyState
 import com.example.journal.ui.components.EntryCard
 import com.example.journal.ui.viewmodels.JournalViewModel
@@ -35,6 +38,7 @@ fun JournalHomeScreen(
     onNavigateToEntriesList: () -> Unit,
     onNavigateToEntryDetail: (Long) -> Unit,
     onNavigateToEntryEdit: (Long?) -> Unit,
+    onJournalSelected: ((Long) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -42,6 +46,7 @@ fun JournalHomeScreen(
         factory = getJournalViewModelFactory(context)
     )
     val scope = rememberCoroutineScope()
+    val preferences = remember { JournalPreferences(context) }
     
     // Get selected journal name
     val journals by viewModel.allJournals.collectAsState(initial = emptyList())
@@ -57,10 +62,14 @@ fun JournalHomeScreen(
         emptyList()
     }
     
-    // Set default journal if none selected
-    LaunchedEffect(journals) {
+    LaunchedEffect(journals, selectedJournalId) {
         if (selectedJournalId == null && journals.isNotEmpty()) {
-            viewModel.setSelectedJournal(journals.first().id)
+            val firstJournalId = journals.first().id
+            viewModel.setSelectedJournal(firstJournalId)
+            preferences.setSelectedJournalId(firstJournalId)
+            onJournalSelected?.invoke(firstJournalId)
+        } else if (selectedJournalId != null) {
+            viewModel.setSelectedJournal(selectedJournalId)
         }
     }
     
@@ -80,14 +89,6 @@ fun JournalHomeScreen(
                                 contentDescription = "Select Journal"
                             )
                         }
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { /* TODO: Search */ }) {
-                        Icon(Icons.Default.Search, contentDescription = "Search")
-                    }
-                    IconButton(onClick = { /* TODO: Notifications */ }) {
-                        Icon(Icons.Default.Notifications, contentDescription = "Notifications")
                     }
                 }
             )
@@ -132,7 +133,16 @@ fun JournalHomeScreen(
                                 viewModel.deleteEntryById(entry.id)
                             }
                         },
-                        onShare = { /* TODO: Share entry */ }
+                        onShare = {
+                            val shareText = "${entry.title}\n\n${entry.content}"
+                            val sendIntent: Intent = Intent().apply {
+                                action = Intent.ACTION_SEND
+                                putExtra(Intent.EXTRA_TEXT, shareText)
+                                type = "text/plain"
+                            }
+                            val shareIntent = Intent.createChooser(sendIntent, null)
+                            context.startActivity(shareIntent)
+                        }
                     )
                 }
             }
