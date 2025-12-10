@@ -59,35 +59,52 @@ fun EntryCard(
                 .padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Thumbnail - show image if available, otherwise placeholder
+            // Thumbnail - show image if available, mood icon if mood entry, otherwise placeholder
             val context = LocalContext.current
+            val isMoodEntry = entry.mood != null && entry.imageUri == null
+            val moodEmoji = if (isMoodEntry) {
+                getMoodEmoji(entry.mood!!)
+            } else null
+            
             Box(
                 modifier = Modifier
                     .size(60.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .background(
-                        if (entry.imageUri != null) Color.Transparent 
-                        else MaterialTheme.colorScheme.primaryContainer
+                        when {
+                            entry.imageUri != null -> Color.Transparent
+                            isMoodEntry -> MaterialTheme.colorScheme.primaryContainer
+                            else -> MaterialTheme.colorScheme.primaryContainer
+                        }
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                if (entry.imageUri != null) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(context)
-                            .data(android.net.Uri.parse(entry.imageUri))
-                            .crossfade(true)
-                            .build(),
-                        contentDescription = "Entry thumbnail",
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(RoundedCornerShape(8.dp)),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Text(
-                        text = "📝",
-                        style = MaterialTheme.typography.headlineSmall
-                    )
+                when {
+                    entry.imageUri != null -> {
+                        AsyncImage(
+                            model = ImageRequest.Builder(context)
+                                .data(android.net.Uri.parse(entry.imageUri))
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = "Entry thumbnail",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(RoundedCornerShape(8.dp)),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                    isMoodEntry && moodEmoji != null -> {
+                        Text(
+                            text = moodEmoji,
+                            style = MaterialTheme.typography.headlineMedium
+                        )
+                    }
+                    else -> {
+                        Text(
+                            text = "📝",
+                            style = MaterialTheme.typography.headlineSmall
+                        )
+                    }
                 }
             }
             
@@ -180,6 +197,16 @@ private fun formatDate(timestamp: Long): String {
         else -> {
             SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(timestamp))
         }
+    }
+}
+
+private fun getMoodEmoji(moodValue: Int): String {
+    return when {
+        moodValue <= 20 -> "😢" // Very Unsatisfied
+        moodValue <= 40 -> "😕" // Unsatisfied
+        moodValue <= 60 -> "🙂" // Neutral
+        moodValue <= 80 -> "😊" // Satisfied
+        else -> "😄" // Very Satisfied
     }
 }
 
