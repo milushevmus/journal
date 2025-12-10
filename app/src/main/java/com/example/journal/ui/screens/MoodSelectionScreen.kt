@@ -14,7 +14,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.rememberLottieComposition
-import com.example.journal.ui.viewmodels.JournalViewModel
+import com.example.journal.data.model.MoodState
+import com.example.journal.ui.viewmodel.JournalViewModel
 import com.example.journal.ui.viewmodel.getJournalViewModelFactory
 import kotlinx.coroutines.launch
 
@@ -22,6 +23,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun MoodSelectionScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToDescription: (Float) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -34,13 +36,7 @@ fun MoodSelectionScreen(
     var moodValue by remember { mutableFloatStateOf(50f) }
     
     // Map mood value to animation and label
-    val moodState = when {
-        moodValue <= 20f -> MoodState.VeryUnsatisfied
-        moodValue <= 40f -> MoodState.Unsatisfied
-        moodValue <= 60f -> MoodState.Neutral
-        moodValue <= 80f -> MoodState.Satisfied
-        else -> MoodState.VerySatisfied
-    }
+    val moodState = MoodState.fromMoodValue(moodValue)
     
     // Load Lottie composition
     val composition by rememberLottieComposition(
@@ -53,7 +49,7 @@ fun MoodSelectionScreen(
             TopAppBar(
                 title = { },
                 actions = {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(onClick = { onNavigateToDescription(moodValue) }) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowForward,
                             contentDescription = "Next"
@@ -85,10 +81,15 @@ fun MoodSelectionScreen(
                     .size(350.dp),
                 contentAlignment = Alignment.Center
             ) {
-                LottieAnimation(
-                    composition = composition,
-                    iterations = Int.MAX_VALUE,
-                    modifier = Modifier.fillMaxSize()
+                composition?.let {
+                    LottieAnimation(
+                        composition = it,
+                        iterations = Int.MAX_VALUE,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } ?: Text(
+                    text = moodState.label,
+                    style = MaterialTheme.typography.headlineMedium
                 )
             }
             
@@ -139,16 +140,5 @@ fun MoodSelectionScreen(
             }
         }
     }
-}
-
-private enum class MoodState(
-    val label: String,
-    val assetPath: String
-) {
-    VeryUnsatisfied("Very Unsatisfied", "veryUnsatisfied.lottie"),
-    Unsatisfied("Unsatisfied", "unsatisfied.lottie"),
-    Neutral("Neutral", "neutral.lottie"),
-    Satisfied("Satisfied", "satisfied.lottie"),
-    VerySatisfied("Very Satisfied", "verySatisfied.lottie")
 }
 

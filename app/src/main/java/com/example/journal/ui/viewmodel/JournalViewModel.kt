@@ -3,6 +3,7 @@ package com.example.journal.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.journal.data.model.Journal
 import com.example.journal.data.model.JournalEntry
 import com.example.journal.data.repository.JournalRepository
 import kotlinx.coroutines.flow.Flow
@@ -13,7 +14,11 @@ import kotlinx.coroutines.launch
 
 class JournalViewModel(private val repository: JournalRepository) : ViewModel() {
     
+    val allJournals: Flow<List<Journal>> = repository.getAllJournals()
     val allEntries: Flow<List<JournalEntry>> = repository.getAllEntries()
+    
+    private val _selectedJournalId = MutableStateFlow<Long?>(null)
+    val selectedJournalId: StateFlow<Long?> = _selectedJournalId.asStateFlow()
     
     private val _selectedEntry = MutableStateFlow<JournalEntry?>(null)
     val selectedEntry: StateFlow<JournalEntry?> = _selectedEntry.asStateFlow()
@@ -82,6 +87,33 @@ class JournalViewModel(private val repository: JournalRepository) : ViewModel() 
     
     fun clearUiState() {
         _uiState.value = JournalUiState.Idle
+    }
+    
+    // Journal operations
+    fun getEntriesByJournalId(journalId: Long): Flow<List<JournalEntry>> {
+        return repository.getEntriesByJournalId(journalId)
+    }
+    
+    fun setSelectedJournal(journalId: Long?) {
+        viewModelScope.launch {
+            _selectedJournalId.value = journalId
+        }
+    }
+    
+    suspend fun insertJournal(journal: Journal): Long {
+        return repository.insertJournal(journal)
+    }
+    
+    suspend fun deleteJournal(journal: Journal) {
+        repository.deleteJournal(journal)
+    }
+    
+    suspend fun deleteJournalById(id: Long) {
+        repository.deleteJournalById(id)
+    }
+    
+    suspend fun updateJournal(journal: Journal) {
+        repository.updateJournal(journal)
     }
 }
 

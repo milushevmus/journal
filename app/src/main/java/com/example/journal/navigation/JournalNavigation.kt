@@ -18,6 +18,7 @@ import com.example.journal.ui.screens.EntriesListScreen
 import com.example.journal.ui.screens.EntryDetailScreen
 import com.example.journal.ui.screens.JournalHomeScreen
 import com.example.journal.ui.screens.MoodSelectionScreen
+import com.example.journal.ui.screens.MoodDescriptionScreen
 
 @Composable
 fun JournalNavigation(
@@ -95,7 +96,20 @@ fun JournalNavigation(
 
         composable(JournalRoutes.MOOD) {
             MoodSelectionScreen(
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToDescription = { moodValue ->
+                    navController.navigate(JournalRoutes.moodDescription(moodValue))
+                }
+            )
+        }
+
+        composable("${JournalRoutes.MOOD_DESCRIPTION}/{${JournalRoutes.MOOD_VALUE_ARG}}") { backStackEntry ->
+            val moodValueInt = backStackEntry.arguments?.getString(JournalRoutes.MOOD_VALUE_ARG)?.toIntOrNull() ?: 50
+            val moodValue = moodValueInt.toFloat()
+            MoodDescriptionScreen(
+                initialMoodValue = moodValue,
+                onNavigateBack = { navController.popBackStack() },
+                onSave = { navController.popBackStack(JournalRoutes.MOOD, inclusive = false) }
             )
         }
 
