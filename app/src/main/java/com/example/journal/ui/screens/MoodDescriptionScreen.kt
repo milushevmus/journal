@@ -189,7 +189,7 @@ fun MoodDescriptionScreen(
                     val rowList = mutableListOf<List<String>>()
                     var currentRow = mutableListOf<String>()
                     
-                    visibleDescriptors.forEach { descriptor ->
+                    visibleDescriptors.forEach { descriptor: String ->
                         currentRow.add(descriptor)
                         if (currentRow.size >= 3) {
                             rowList.add(currentRow.toList())
