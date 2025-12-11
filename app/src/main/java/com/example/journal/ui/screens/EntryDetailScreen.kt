@@ -27,7 +27,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.journal.data.model.JournalEntry
-import com.example.journal.ui.viewmodels.JournalViewModel
+import com.example.journal.ui.viewmodel.JournalViewModel
 import com.example.journal.ui.viewmodel.getJournalViewModelFactory
 import java.text.SimpleDateFormat
 import java.util.*

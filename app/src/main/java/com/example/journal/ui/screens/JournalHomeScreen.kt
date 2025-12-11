@@ -27,7 +27,7 @@ import com.example.journal.data.model.JournalEntry
 import com.example.journal.data.preferences.JournalPreferences
 import com.example.journal.ui.components.EmptyState
 import com.example.journal.ui.components.EntryCard
-import com.example.journal.ui.viewmodels.JournalViewModel
+import com.example.journal.ui.viewmodel.JournalViewModel
 import com.example.journal.ui.viewmodel.getJournalViewModelFactory
 import kotlinx.coroutines.launch
 

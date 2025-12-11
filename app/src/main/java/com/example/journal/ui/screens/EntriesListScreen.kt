@@ -25,7 +25,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.journal.data.model.Journal
 import com.example.journal.ui.components.EmptyState
 import com.example.journal.ui.components.JournalEditBottomSheet
-import com.example.journal.ui.viewmodels.JournalViewModel
+import com.example.journal.ui.viewmodel.JournalViewModel
 import com.example.journal.ui.viewmodel.getJournalViewModelFactory
 import kotlinx.coroutines.launch
 
