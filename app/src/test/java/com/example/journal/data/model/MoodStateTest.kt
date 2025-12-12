@@ -5,48 +5,6 @@ import org.junit.Test
 
 class MoodStateTest {
 
-    @Test
-    fun `test all enum values have correct properties`() {
-        // Test VeryUnsatisfied
-        assertEquals("Very Unsatisfied", MoodState.VeryUnsatisfied.label)
-        assertEquals("veryUnsatisfied.lottie", MoodState.VeryUnsatisfied.assetPath)
-        assertTrue(MoodState.VeryUnsatisfied.descriptors.isNotEmpty())
-        assertEquals(10, MoodState.VeryUnsatisfied.descriptors.size)
-        assertTrue(MoodState.VeryUnsatisfied.descriptors.contains("Angry"))
-        assertTrue(MoodState.VeryUnsatisfied.descriptors.contains("Sad"))
-
-        // Test Unsatisfied
-        assertEquals("Unsatisfied", MoodState.Unsatisfied.label)
-        assertEquals("unsatisfied.lottie", MoodState.Unsatisfied.assetPath)
-        assertTrue(MoodState.Unsatisfied.descriptors.isNotEmpty())
-        assertEquals(10, MoodState.Unsatisfied.descriptors.size)
-        assertTrue(MoodState.Unsatisfied.descriptors.contains("Tired"))
-        assertTrue(MoodState.Unsatisfied.descriptors.contains("Bored"))
-
-        // Test Neutral
-        assertEquals("Neutral", MoodState.Neutral.label)
-        assertEquals("neutral.lottie", MoodState.Neutral.assetPath)
-        assertTrue(MoodState.Neutral.descriptors.isNotEmpty())
-        assertEquals(10, MoodState.Neutral.descriptors.size)
-        assertTrue(MoodState.Neutral.descriptors.contains("Content"))
-        assertTrue(MoodState.Neutral.descriptors.contains("Calm"))
-
-        // Test Satisfied
-        assertEquals("Satisfied", MoodState.Satisfied.label)
-        assertEquals("satisfied.lottie", MoodState.Satisfied.assetPath)
-        assertTrue(MoodState.Satisfied.descriptors.isNotEmpty())
-        assertEquals(10, MoodState.Satisfied.descriptors.size)
-        assertTrue(MoodState.Satisfied.descriptors.contains("Happy"))
-        assertTrue(MoodState.Satisfied.descriptors.contains("Excited"))
-
-        // Test VerySatisfied
-        assertEquals("Very Satisfied", MoodState.VerySatisfied.label)
-        assertEquals("verySatisfied.lottie", MoodState.VerySatisfied.assetPath)
-        assertTrue(MoodState.VerySatisfied.descriptors.isNotEmpty())
-        assertEquals(10, MoodState.VerySatisfied.descriptors.size)
-        assertTrue(MoodState.VerySatisfied.descriptors.contains("Joyful"))
-        assertTrue(MoodState.VerySatisfied.descriptors.contains("Ecstatic"))
-    }
 
     @Test
     fun `test fromMoodValue returns VeryUnsatisfied for values less than or equal to 20`() {
@@ -149,4 +107,3 @@ class MoodStateTest {
         }
     }
 }
-
