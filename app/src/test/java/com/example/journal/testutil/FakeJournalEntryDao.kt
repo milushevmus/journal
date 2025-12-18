@@ -28,6 +28,9 @@ class FakeJournalEntryDao(
     var throwOnDelete: Throwable? = null
     var throwOnDeleteById: Throwable? = null
 
+    var lastGetEntriesByDateStartOfDay: Long? = null
+    var lastGetEntriesByDateEndOfDay: Long? = null
+
     override fun getAllEntries(): Flow<List<JournalEntry>> {
         getAllEntriesCalls++
         return backing.map { list ->
@@ -43,6 +46,8 @@ class FakeJournalEntryDao(
 
     override fun getEntriesByDate(startOfDay: Long, endOfDay: Long): Flow<List<JournalEntry>> {
         getEntriesByDateCalls++
+        lastGetEntriesByDateStartOfDay = startOfDay
+        lastGetEntriesByDateEndOfDay = endOfDay
         return backing.map { list ->
             list.filter { it.date >= startOfDay && it.date < endOfDay }
                 .sortedByDescending { it.createdAt }
@@ -92,5 +97,6 @@ class FakeJournalEntryDao(
 
     fun snapshot(): List<JournalEntry> = backing.value
 }
+
 
 
