@@ -1,10 +1,11 @@
 ## Journal (Android App)
-<img width="1280" height="2856" alt="Screenshot_20251218_145530" src="https://github.com/user-attachments/assets/dc395728-48ab-4113-979c-bfbe10c82675" />
-<img width="1280" height="2856" alt="Screenshot_20251218_145521" src="https://github.com/user-attachments/assets/86885a26-ca34-4b2b-ad2e-715553ba66e7" />
-<img width="1280" height="2856" alt="Screenshot_20251218_145404" src="https://github.com/user-attachments/assets/67f8707c-b386-4243-953c-774d7260f8e3" />
-<img width="1280" height="2856" alt="Screenshot_20251218_145339" src="https://github.com/user-attachments/assets/8b1997ad-f72a-4431-8c96-85c615abc88f" />
-<img width="1280" height="2856" alt="Screenshot_20251218_145320" src="https://github.com/user-attachments/assets/69ba5de0-3686-4205-ba07-177946984549" />
-<img width="1280" height="2856" alt="Screenshot_20251218_145242" src="https://github.com/user-attachments/assets/348b908d-08c0-43b7-a3d3-cb25c4e4f38a" />
+
+<img width="30%" height="30%" alt="Screenshot_20251218_145242" src="https://github.com/user-attachments/assets/348b908d-08c0-43b7-a3d3-cb25c4e4f38a" />
+<img width="30%" height="30%" alt="Screenshot_20251218_145530" src="https://github.com/user-attachments/assets/dc395728-48ab-4113-979c-bfbe10c82675" />
+<img width="30%" height="30%" alt="Screenshot_20251218_145521" src="https://github.com/user-attachments/assets/86885a26-ca34-4b2b-ad2e-715553ba66e7" />
+<img width="30%" height="30%" alt="Screenshot_20251218_145404" src="https://github.com/user-attachments/assets/67f8707c-b386-4243-953c-774d7260f8e3" />
+<img width="30%" height="30%" alt="Screenshot_20251218_145339" src="https://github.com/user-attachments/assets/8b1997ad-f72a-4431-8c96-85c615abc88f" />
+<img width="30%" height="30%" alt="Screenshot_20251218_145320" src="https://github.com/user-attachments/assets/69ba5de0-3686-4205-ba07-177946984549" />
 
 A simple journaling app built with **Jetpack Compose**. Create multiple journals, write entries, attach an image, and track how you’re feeling with a mood slider.
 
